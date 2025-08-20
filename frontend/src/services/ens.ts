@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 
-const MAINNET_RPC = 'https://eth-mainnet.g.alchemy.com/v2/your-api-key'; // We'll need to move this to env
+// Get the API key from environment variables
+const ALCHEMY_API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
+const MAINNET_RPC = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 
 export interface ENSProfile {
   name: string;
@@ -12,6 +14,9 @@ export class ENSService {
   private provider: ethers.JsonRpcProvider;
 
   constructor() {
+    if (!ALCHEMY_API_KEY) {
+      throw new Error('Alchemy API key not found. Please set VITE_ALCHEMY_API_KEY in your .env file');
+    }
     this.provider = new ethers.JsonRpcProvider(MAINNET_RPC);
   }
 
@@ -19,7 +24,7 @@ export class ENSService {
     try {
       // Validate ENS name format
       if (!ensName.endsWith('.eth')) {
-        throw new Error('Invalid ENS name format');
+        throw new Error('Invalid ENS name format. Must end with .eth');
       }
 
       // Resolve the ENS name to an address
@@ -40,6 +45,18 @@ export class ENSService {
     } catch (error) {
       console.error('Error resolving ENS:', error);
       return null;
+    }
+  }
+
+  // Add method to validate connection
+  async testConnection(): Promise<boolean> {
+    try {
+      const network = await this.provider.getNetwork();
+      console.log('Connected to network:', network.name);
+      return true;
+    } catch (error) {
+      console.error('Failed to connect to Ethereum network:', error);
+      return false;
     }
   }
 }

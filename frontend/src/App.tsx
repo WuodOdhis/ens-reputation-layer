@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { useENS } from './hooks/useENS'
+import { ConnectionStatus } from './components/ConnectionStatus'
 
 interface ReputationData {
   ens: string;
@@ -123,6 +124,7 @@ function App() {
           </div>
         )}
       </div>
+      <ConnectionStatus />
     </div>
   )
 }
