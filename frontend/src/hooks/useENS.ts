@@ -1,38 +1,27 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { ensService, ENSProfile } from '../services/ens';
 
 export function useENS() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ENSProfile | null>(null);
 
-  const resolveENS = useCallback(async (ensName: string) => {
+  const resolveENS = async (ensName: string): Promise<ENSProfile | null> => {
     try {
       setLoading(true);
       setError(null);
-      
-      const result = await ensService.resolveENS(ensName);
-      if (!result) {
-        setError('ENS name not found');
-        setProfile(null);
-        return null;
-      }
-
-      setProfile(result);
-      return result;
+      return await ensService.resolveENS(ensName);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to resolve ENS name');
-      setProfile(null);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resolve ENS name';
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   return {
     resolveENS,
     loading,
-    error,
-    profile
+    error
   };
 }
